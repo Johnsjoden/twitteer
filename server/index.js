@@ -22,19 +22,27 @@ let storage = multer.diskStorage({
 })
 const upload = multer({ storage: storage })
 
-app.use(express.static(path.join(__dirname, "/public")))
+app.use(express.static(path.join(__dirname + "/public")))
+
 app.use(upload.single("uploaded-file"))
-app.use(express.json())
+app.use(express.json()) 
 app.use( async (req, res, next) => {
     req.post = await Post.find()
     // error när någon har en expired token lös skiten
     const authHeader = req.header("Authorization")
-    if(authHeader){
+    try{
+        if(authHeader){ 
         const token  = authHeader.split(" ")[1]
+        console.log(authHeader)
         req.user = JWT.verify(token, JWT_SECRET)
     }
     next()
-})
+    }
+    catch(error){
+        res.sendStatus(400)
+    }
+    
+}) 
 
 const requireLogin = (req, res, next) => {
     if(req.user) {
@@ -51,68 +59,66 @@ app.post("/user", async (req ,res ) => {
     res.json({username})  
     
 })
-app.patch("/user", requireLogin, async (req,res) => {
-    const { email, name } = req.body
+app.patch("/user", requireLogin, async (req,res) => { 
+    const { email, name, username } = req.body 
+    const userId = mongoose.Types.ObjectId(req.user.userId)
     if(req.file){
-        const imageURL = req.file.filename
-        const result = await User.findOneAndUpdate(req.user._id, {"email":  email, "name": name, "imageURL": imageURL})
+        const imageURL = "http://localhost:3001/" + req.file.filename
+        const result = await User.findOneAndUpdate({_id: userId}, {"name": name, "email": email, "imageURL": imageURL, "username": username})
+        res.send("Sucess")
+    }else {
+        const result = await User.findOneAndUpdate({_id: userId}, {"name": name, "email": email, "username": username})
+        res.send("Sucess")  
     }
-    const result = await User.findOneAndUpdate(req.user._id, {"email":  email, "name": name})
-    res.json({message: "hello from user patch"})
-})
-
+    
+}) 
+ 
 app.post("/token", async (req, res ) => {
     const {username, password} = req.body
     const user = await User.login(username, password)
     
-     if(user) {
+     if(user) { 
         const userId = user._id.toString();
         const token = JWT.sign(
-            {userId, username: user.username},
+            {userId, username: user.username},  
             JWT_SECRET, 
-            {expiresIn: "1h", subject: userId}
+            {expiresIn: 5, subject: userId}
         )
+        
         res.json({token})
     }else {
         res.sendStatus(401)
     }  
 })
+/* app.post("/password", (req, res) => {
+    const {oldPassword, newPassword, checkPassword} = req.body
+    console.log(req.body)
+    res.send("hello from password")
+}) */
 // ALLA POST 
 app.get("/post", async (req, res) => {
-    const getPostData = await Post.find({collectionName: "post"}).sort({date: -1})
     const newData = await Post.find({}).populate("userId", "imageURL username name").sort({date: -1})
-    const Data = await Post.aggregate([
-        {
-          '$lookup': {
-            'from': 'users', 
-            'localField': 'userId', 
-            'foreignField': '_id', 
-            'as': 'userImage'
-          }
-        }, {
-          '$project': {
-            'content': 1, 
-            'date': 1, 
-            'userImage': {
-              'image': 1, 
-              'username': 1
-            }
-          }
-        }
-      ]).sort({date: -1})
     res.json(newData)
 })
-
-app.get("/profile/:name", async (req, res ) => {
-    const name = req.params.name
-    const result = await User.findOne({username: name}, {imageURL: 1, username: 1, email: 1})
+app.get("/post/:id", async (req, res ) => {
+    const id = req.params.id
+    const result = await Post.find({userId: id}).populate("userId", "imageURL username name").sort({date: -1})
     res.json(result)
 })
 
+app.get("/profile/:id", async (req, res ) => {
+    const id = req.params.id
+    const result = await User.findOne({_id: id}, {imageURL: 1, username: 1, email: 1, name: 1})
+    res.json(result) 
+})
+app.get("/hashtag/:id", requireLogin, async (req, res) => {
+    const hashtag = req.params.id 
+    const result = await Post.find({'content': {'$regex': new RegExp(`#\\b${hashtag}\\b`, "gi")}}).populate("userId", "imageURL username name").sort({date: -1})
+    res.json(result)
+}) 
+
 app.post("/posts", requireLogin ,async (req, res ) => {
-    console.log(req.user)
-    const id = req.post
-    console.log(id)
+    const id = req.post 
     const data = {
         content: req.body.contentData,
         userId: req.user.userId,
@@ -120,12 +126,10 @@ app.post("/posts", requireLogin ,async (req, res ) => {
     } 
     const post = await new Post(data)
     post.save()
-    // vi använder utav req.user för att koppla vilken user som är i. Sedan findOne({}) där ligger allt
-    // vi lägger in bilden + user._id för att koppla ihop posten.
     res.send("Post got added")
 })
 // DELETE
-app.delete("/delete/:id", async (req, res ) => {
+app.delete("/delete/:id", requireLogin, async (req, res ) => {
     const id = req.params.id
     const deletePost = await Post.deleteOne({_id: id})
     res.json({message: "deleted post"})

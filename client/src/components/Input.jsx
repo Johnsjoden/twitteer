@@ -1,18 +1,18 @@
 import React from 'react'
 
-export default function Input({type, setValue, value, placeholder}) {
-    const renderInput = (type, setValue, value, placeholder) => {
-        return <label htmlFor={placeholder}>{placeholder}<input
+export default function Input({type, setValue, value, label}) {
+    const renderInput = (type, setValue, value, label) => {
+        return <label htmlFor={label}>{label}<input
         type={type}
-        placeholder={value}
+        label={value}
         onChange={e => setValue(e.target.value)}
         value={value}
-        id={placeholder}
+        id={label}
         /></label>
     }
   return (
     <div>
-        {renderInput(type, setValue, value, placeholder)}
+        {renderInput(type, setValue, value, label)}
     </div>
   )
 }

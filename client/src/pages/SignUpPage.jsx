@@ -23,8 +23,8 @@ export default function SignUpPage() {
     <div>
       <h1>Sign uasfasfp</h1>
         <form onSubmit={handleOnSubmit}>
-          <Input type="text" placeholder="username" value={username} setValue={setUsername}/>
-          <Input type="password" placeholder="password" value={password} setValue={setPassword}/>
+          <Input type="text" label="username" value={username} setValue={setUsername}/>
+          <Input type="password" label="password" value={password} setValue={setPassword}/>
           <button submit="submit">submit</button>
         </form>
     </div>

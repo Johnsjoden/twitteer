@@ -18,7 +18,7 @@ export default function LoginPage() {
     .then(data => {
      const token = data.token
      localStorage.setItem("key", token)
-     navigate("/profile")
+     navigate("/")
     })
   }
   return (
@@ -26,8 +26,8 @@ export default function LoginPage() {
       <h1>Login</h1>
       <p>You dont have a account? What, man this is the site to be at. Sign up right <Link to="/signup">HERE</Link></p>
       <form onSubmit={handleOnSubmit}>
-          <Input type="text" placeholder="username" value={username} setValue={setUsername}/>
-          <Input type="password" placeholder="password" value={password} setValue={setPassword}/>
+          <Input type="text" label="username" value={username} setValue={setUsername}/>
+          <Input type="password" label="password" value={password} setValue={setPassword}/>
           <button submit="submit">submit</button>
         </form>
     </div>
