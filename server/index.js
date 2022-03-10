@@ -30,16 +30,23 @@ app.use( async (req, res, next) => {
     req.post = await Post.find()
     // error när någon har en expired token lös skiten
     const authHeader = req.header("Authorization")
-    try{
+    
         if(authHeader){ 
         const token  = authHeader.split(" ")[1]
-        console.log(authHeader)
-        req.user = JWT.verify(token, JWT_SECRET)
-    }
-    next()
-    }
-    catch(error){
-        res.sendStatus(400)
+        req.user = JWT.verify(token, JWT_SECRET, function(err) {
+            if(err){
+                err = {
+                    name: 'TokenExpiredError',
+                    message: 'jwt expired'
+                }
+                res.status(400).json(err)
+            } 
+            else {
+                next()
+            }
+        })
+    }else {
+      next()  
     }
     
 }) 
@@ -84,7 +91,7 @@ app.post("/token", async (req, res ) => {
             JWT_SECRET, 
             {expiresIn: 5, subject: userId}
         )
-        
+
         res.json({token})
     }else {
         res.sendStatus(401)
