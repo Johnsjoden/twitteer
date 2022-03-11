@@ -124,7 +124,7 @@ app.get("/post/:id", async (req, res ) => {
 })
 
 app.get("/profile/:id", async (req, res ) => {
-    try{
+    try{ 
         const id = req.params.id
         const result = await User.findOne({_id: id}, {imageURL: 1, username: 1, email: 1, name: 1})
         res.json(result) 
