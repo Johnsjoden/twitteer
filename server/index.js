@@ -30,6 +30,7 @@ app.use( async (req, res, next) => {
     req.post = await Post.find()
     // error när någon har en expired token lös skiten
     const authHeader = req.header("Authorization")
+    console.log(authHeader)
         if(authHeader){ 
         const token  = authHeader.split(" ")[1]
         JWT.verify(token, JWT_SECRET, function(err) {
@@ -40,6 +41,7 @@ app.use( async (req, res, next) => {
                 }
                 res.status(401).json(err)
             }else {
+                console.log("hello")
                 req.user = JWT.verify(token, JWT_SECRET)
             }
         })
@@ -50,6 +52,7 @@ app.use( async (req, res, next) => {
 
 const requireLogin = (req, res, next) => {
     try{
+        console.log(req.user)
       if(req.user) {
         next() 
     } else {
@@ -92,7 +95,7 @@ app.post("/token", async (req, res ) => {
         const token = JWT.sign(
             {userId, username: user.username},  
             JWT_SECRET, 
-            {expiresIn: 5, subject: userId}
+            {expiresIn: "24h", subject: userId}
         )
 
         res.json({token})
@@ -114,7 +117,6 @@ app.get("/post/:id", async (req, res ) => {
     try{
         const id = req.params.id
         const result = await Post.find({userId: id}).populate("userId", "imageURL username name").sort({date: -1})
-        console.log(result)
         res.json(result)
     }catch(err){
         res.sendStatus(404)
@@ -134,7 +136,7 @@ app.get("/profile/:id", async (req, res ) => {
     }
     
 })
-app.get("/hashtag/:id", requireLogin, async (req, res) => {
+app.get("/hashtag/:id",requireLogin, async (req, res) => {
     const hashtag = req.params.id 
     const result = await Post.find({'content': {'$regex': new RegExp(`#\\b${hashtag}\\b`, "gi")}}).populate("userId", "imageURL username name").sort({date: -1})
     res.json(result) 
@@ -157,7 +159,9 @@ app.delete("/delete/:id", requireLogin, async (req, res ) => {
     const deletePost = await Post.deleteOne({_id: id})
     res.json({message: "deleted post"})
 })
-
+app.get("/me", (req, res) => {
+    const userId = req.user.userId
+})
 
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);

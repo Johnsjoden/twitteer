@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import PrivateRoute from '../components/PrivateRoute'
+import { Link } from 'react-router-dom'
+import reactStringReplace from 'react-string-replace'
 import Input from '../components/Input'
 import { useEffect } from 'react'
 import axios from 'axios'
@@ -77,14 +78,14 @@ export default function ProfilePageBug() {
         }
         fetch("/password", {
           method: "POST",
-          headers: {"Auhorization": `Bearer ` + token},
+          headers: {"Authorization": `Bearer ` + token},
           body: JSON.stringify(payload)
         })
       }
       const handleOnDelete = (id, e) => {
         e.preventDefault()
         axios.delete(`/delete/${id}`, {
-          headers: {"Auhorization": `Bearer ` + token},
+          headers: {"Authorization": `Bearer ` + token},
           post: postData
         })
         fetchData()
@@ -128,6 +129,12 @@ export default function ProfilePageBug() {
        
         
       }
+      const renderLink = (content) => {
+        content = reactStringReplace(content, /#(\w+)/g, (match, i) => (
+          <Link key={match + i} to={`/hashtag/${match}`}>#{match}</Link>
+        ));
+        return content
+      }
   return (
         <div>ProfilePageBug
         <div className='container'>
@@ -145,7 +152,7 @@ export default function ProfilePageBug() {
               {
           postData.map((item, index) => {
             return <div key={index} >
-              <p>{item.content}</p>
+              <div>{renderLink(item.content)}</div>
               <p>{item.date}</p>
               <img className='img-fluid img-thumbnail' style={{width: "10%"}} src={item.userId.imageURL} alt="profile" /> <br/>
               {
