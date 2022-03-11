@@ -27,7 +27,6 @@ export default function HashtagPage() {
   return (
     <div>HashtagPage
         <div>
-
         </div>
                 {data.map((item, index) => {
                     return <div key={index}>
