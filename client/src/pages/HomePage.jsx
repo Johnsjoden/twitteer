@@ -109,20 +109,13 @@ export default function HomePage() {
         })
         getApi()
     }
-    const handleOnDelete = (id, e) => {
-      e.preventDefault()
-      axios.delete(`/delete/${id}`, {
-        post: contentData
-      })
-      getApi()
-    }
     console.log(getData)
   return (
     <div className="container">
       <div className="row ">
         <div className="col-2">
         <Link to="/login">Logga in</Link><br/>
-      <Link to="/signup">Create Account</Link>
+        <Link to="/signup">Create Account</Link>
         </div>
         <div className="col-10">
           {

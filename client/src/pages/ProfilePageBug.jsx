@@ -4,6 +4,7 @@ import PrivateRoute from '../components/PrivateRoute'
 import Input from '../components/Input'
 import { useEffect } from 'react'
 import axios from 'axios'
+import jwt_decode from "jwt-decode";
 
 export default function ProfilePageBug() {
     const [email, setEmail] = useState("")
@@ -88,49 +89,78 @@ export default function ProfilePageBug() {
         })
         fetchData()
       }
+      const renderForm = () => {
+        if(token == null){
+          return ""
+        }else {
+          const decode = jwt_decode(token)
+          const userId = decode.userId
+          if(userId === id){
+            return <div>
+              <form onSubmit={handleOnSubmit}>
+            <Input type="text" label="name" value={name} setValue={setName} />
+            <Input type="text" label="email" value={email} setValue={setEmail}/>
+            <Input type="text" label="username" value={username} setValue={setUsername} />
+            <input type="file" label='file' onChange={handleFileUpload} />
+            <button type="submit">Submit</button>
+          </form>
+          <br></br>
+          <form onSubmit={handlePassword}>
+            <Input type="text" label="Current" value={oldPassword} setValue={setOldPassword} />
+            <Input type="text" label="new" value={newPassword} setValue={setNewPassword} />
+            <Input type="text" label="Retype new" value={checkPassword} setValue={setCheckPassword} />
+            <button type="submit">Submit</button>
+          </form>
+          <button onClick={handleLogOut}>log out</button>
+            </div> 
+          }
+        }
+      } 
+      const renderDeleteButton = (item) => {
+        if(token == null){
+          return ""
+        }else {
+          const decode = jwt_decode(token)
+          const userId = decode.userId
+          if(userId === id)
+           return <button className="btn-primary"onClick={e => handleOnDelete(item._id, e)}>DELETE</button>
+        }
+       
+        
+      }
   return (
-    <PrivateRoute>
         <div>ProfilePageBug
         <div className='container'>
-        <nav className="navbar-nav-scroll fixed-top navbar-light bg-light">
-            <div className="container-fluid">
-            <span className="navbar-brand">Username: {profileData.username}</span>
-            <span className="navbar-brand">Name: {profileData.name}</span>
-            <span className="navbar-brand">Email: {profileData.email}</span>
-            </div>
-        </nav>
-        <br/>
+          <div className="row">
+            <div className='col-3'>
+              <img className='img-thumbnail' src={profileData.imageURL} />
+              <p>Username: {profileData.username}</p>
+              <p>Name: {profileData.name}</p>
+              <p>Email: {profileData.email}</p>
         {
+          renderForm(token)
+        }
+            </div>
+            <div className='col-9'>
+              {
           postData.map((item, index) => {
             return <div key={index} >
               <p>{item.content}</p>
               <p>{item.date}</p>
               <img className='img-fluid img-thumbnail' style={{width: "10%"}} src={item.userId.imageURL} alt="profile" /> <br/>
-              <button className="btn-primary"onClick={e => handleOnDelete(item._id, e)}>DELETE</button>
+              {
+                renderDeleteButton(item)
+              }
             </div>
             
           }) 
         }
-        <form onSubmit={handleOnSubmit}>
-          <Input type="text" label="name" value={name} setValue={setName} />
-          <Input type="text" label="email" value={email} setValue={setEmail}/>
-          <Input type="text" label="username" value={username} setValue={setUsername} />
-          <input type="file" label='file' onChange={handleFileUpload} />
-          <button type="submit">Submit</button>
-        </form>
-        <br></br>
-        <form onSubmit={handlePassword}>
-          <Input type="text" label="Current" value={oldPassword} setValue={setOldPassword} />
-          <Input type="text" label="new" value={newPassword} setValue={setNewPassword} />
-          <Input type="text" label="Retype new" value={checkPassword} setValue={setCheckPassword} />
-          <button type="submit">Submit</button>
-        </form>
-        <button onClick={handleLogOut}>log out</button>
-        </div>
-        </div>
-
+            </div>
+        <br/>
         
-    </PrivateRoute>
+        </div>
+        </div>
+        </div>
     
   )
 }

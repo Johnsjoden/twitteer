@@ -30,33 +30,36 @@ app.use( async (req, res, next) => {
     req.post = await Post.find()
     // error när någon har en expired token lös skiten
     const authHeader = req.header("Authorization")
-    
         if(authHeader){ 
         const token  = authHeader.split(" ")[1]
-        req.user = JWT.verify(token, JWT_SECRET, function(err) {
+        JWT.verify(token, JWT_SECRET, function(err) {
             if(err){
                 err = {
                     name: 'TokenExpiredError',
                     message: 'jwt expired'
                 }
-                res.status(400).json(err)
-            } 
-            else {
-                next()
+                res.status(401).json(err)
+            }else {
+                req.user = JWT.verify(token, JWT_SECRET)
             }
         })
-    }else {
-      next()  
     }
+    next()
     
 }) 
 
 const requireLogin = (req, res, next) => {
-    if(req.user) {
-        next()
+    try{
+      if(req.user) {
+        next() 
     } else {
         res.sendStatus(401);
+    }  
     }
+    catch(err){
+        console.error("Double sends res..")
+    }
+    
 }
 
 app.post("/user", async (req ,res ) => {
@@ -75,7 +78,7 @@ app.patch("/user", requireLogin, async (req,res) => {
         res.send("Sucess")
     }else {
         const result = await User.findOneAndUpdate({_id: userId}, {"name": name, "email": email, "username": username})
-        res.send("Sucess")  
+        res.send("Sucess")   
     }
     
 }) 
@@ -108,20 +111,33 @@ app.get("/post", async (req, res) => {
     res.json(newData)
 })
 app.get("/post/:id", async (req, res ) => {
-    const id = req.params.id
-    const result = await Post.find({userId: id}).populate("userId", "imageURL username name").sort({date: -1})
-    res.json(result)
+    try{
+        const id = req.params.id
+        const result = await Post.find({userId: id}).populate("userId", "imageURL username name").sort({date: -1})
+        console.log(result)
+        res.json(result)
+    }catch(err){
+        res.sendStatus(404)
+    }
 })
 
 app.get("/profile/:id", async (req, res ) => {
-    const id = req.params.id
-    const result = await User.findOne({_id: id}, {imageURL: 1, username: 1, email: 1, name: 1})
-    res.json(result) 
+    try{
+        const id = req.params.id
+        const result = await User.findOne({_id: id}, {imageURL: 1, username: 1, email: 1, name: 1})
+        res.json(result) 
+    }catch(err){
+        err = {
+            "message": "User not found"
+        }
+        res.status(404).json(err)
+    }
+    
 })
 app.get("/hashtag/:id", requireLogin, async (req, res) => {
     const hashtag = req.params.id 
     const result = await Post.find({'content': {'$regex': new RegExp(`#\\b${hashtag}\\b`, "gi")}}).populate("userId", "imageURL username name").sort({date: -1})
-    res.json(result)
+    res.json(result) 
 }) 
 
 app.post("/posts", requireLogin ,async (req, res ) => {
