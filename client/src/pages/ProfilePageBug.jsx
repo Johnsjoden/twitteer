@@ -172,6 +172,5 @@ export default function ProfilePageBug() {
         </div>
         </div>
         </div>
-    
   )
 }
