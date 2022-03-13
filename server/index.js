@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose")
-const {User, Post} = require("./models/user")
+const {User, Post} = require("./models/models.js")
 const JWT = require("jsonwebtoken")
 const path = require("path")
 const multer = require("multer")
@@ -38,8 +38,6 @@ app.use(express.static(path.join(__dirname + "/public")))
 app.use(upload.single("uploaded-file"))
 app.use(express.json()) 
 app.use( async (req, res, next) => {
-    req.post = await Post.find()
-    // error när någon har en expired token lös skiten
     const authHeader = req.header("Authorization")
         if(authHeader){ 
         const token  = authHeader.split(" ")[1]
@@ -47,7 +45,7 @@ app.use( async (req, res, next) => {
             if(err){
                 err = {
                     name: 'TokenExpiredError',
-                    message: 'jwt expired'
+                    message: 'jwt expired' 
                 }
                 res.status(401).json(err)
             }else {
@@ -91,14 +89,12 @@ app.patch("/user", requireLogin, async (req,res) => {
     if(req.file){
         const imageURL = "http://localhost:3001/" + req.file.filename
         updateProfile.imageURL = imageURL
-        /* const result = await User.findOneAndUpdate({_id: userId}, {"name": name, "email": email, "imageURL": imageURL, "username": username})
-        res.send("Sucess") */
     }
     const result = await User.findOneAndUpdate({_id: userId}, updateProfile)
     res.send("Sucess")   
     
     
-}) 
+})  
  
 app.post("/token", async (req, res ) => {
     const {username, password} = req.body
@@ -122,7 +118,6 @@ app.post("/token", async (req, res ) => {
     console.log(req.body)
     res.send("hello from password")
 }) */
-// ALLA POST 
 app.get("/post", async (req, res) => {
     const newData = await Post.find({}).populate("userId", "imageURL username name").sort({date: -1})
     res.json(newData)
@@ -150,31 +145,35 @@ app.get("/profile/:id", async (req, res ) => {
     }
     
 })
-app.get("/hashtag/:id",requireLogin, async (req, res) => {
+app.get("/hashtag/:id", async (req, res) => {
     const hashtag = req.params.id 
     const result = await Post.find({'content': {'$regex': new RegExp(`#\\b${hashtag}\\b`, "gi")}}).populate("userId", "imageURL username name").sort({date: -1})
     res.json(result) 
 }) 
 
 app.post("/posts", requireLogin ,async (req, res ) => {
-    const id = req.post 
     const data = {
         content: req.body.contentData,
         userId: req.user.userId,
-        id: id.length
+        } 
+    if(data.content.length < 140){
+        const post = await new Post(data)
+        post.save()
+        res.send("Post got added") 
+    }else { 
+        console.log("Hello")
+        const error = {
+            message: "Message over 140"
+        }
+        res.status(400).json(error)
     } 
-    const post = await new Post(data)
-    post.save()
-    res.send("Post got added")
+    
 })
 // DELETE
 app.delete("/delete/:id", requireLogin, async (req, res ) => {
     const id = req.params.id
     const deletePost = await Post.deleteOne({_id: id})
     res.json({message: "deleted post"})
-})
-app.get("/me", (req, res) => {
-    const userId = req.user.userId
 })
 
 server.listen(PORT, () => {

@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useContext} from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import reactStringReplace from 'react-string-replace'
@@ -6,8 +6,14 @@ import Input from '../components/Input'
 import { useEffect } from 'react'
 import axios from 'axios'
 import jwt_decode from "jwt-decode";
+import { apiContext } from '../App'
 
 export default function ProfilePageBug() {
+    const {
+      getData,
+      getApi
+    } = useContext(apiContext)
+    const [contentData, setContentData] = useState("")
     const [email, setEmail] = useState("")
     const [name, setName] = useState("")
     const [image, setImage] = useState("")
@@ -92,6 +98,7 @@ export default function ProfilePageBug() {
           post: postData
         })
         fetchData()
+        getApi()
       }
       const renderForm = () => {
         if(token == null){

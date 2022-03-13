@@ -17,7 +17,7 @@ export default function HomePage() {
     const token = localStorage.getItem("key")
 
     const renderLink = (content) => {
-      content = reactStringReplace(content, /#(\w+)/g, (match, i) => (
+      content = reactStringReplace(content, /#(\S+)/g, (match, i) => (
         <Link key={match + i} to={`/hashtag/${match}`}>#{match}</Link>
       ));
       return content
@@ -58,10 +58,7 @@ export default function HomePage() {
             return <div key={index}>
               <div className="card" style={{width: "18rem;"}}>
                 <Link to={`/profile/${item.userId._id}`}><img className='img-fluid img-thumbnail' style={{width: "10%"}} src={item.userId.imageURL} alt="Jävlar" /></Link>
-                {/* <div>{handlehashTagContent(item.content)}<Link to={`/hashtag/${rightWay(item.content)}`}>{handleHashTagName(item.content)}</Link></div> */}
                 <div>{renderLink(item.content)}</div>
-                {/* <div dangerouslySetInnerHTML={{ __html: handleHashtag(item.content)}}></div> */}
-                
                 <Link to={`/profile/${item.userId._id}`}>{item.userId.username}</Link> <br/>
                 <p>{item.date}</p> </div>
                 <Likedbutton />

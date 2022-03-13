@@ -8,20 +8,15 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("")
   const handleOnSubmit = (e) => {
     e.preventDefault()
-    /* if(username.length < 1 && password.length < 1){
-      alert("du måste skriva in lösenord och användarnamn")
-    }else { */
       axios.post("/user", {
       username: username,
       password: password
       })
       navigate("/login")
-    /* } */
-    
   }
   return (
     <div>
-      <h1>Sign uasfasfp</h1>
+      <h1>Sign up</h1>
         <form onSubmit={handleOnSubmit}>
           <Input type="text" label="username" value={username} setValue={setUsername}/>
           <Input type="password" label="password" value={password} setValue={setPassword}/>
