@@ -140,7 +140,7 @@ export default function ProfilePageBug() {
         
       }
       const renderLink = (content) => {
-        content = reactStringReplace(content, /#(\w+)/g, (match, i) => (
+        content = reactStringReplace(content, /#(\S+)/g, (match, i) => (
           <Link key={match + i} to={`/hashtag/${match}`}>#{match}</Link>
         ));
         return content
