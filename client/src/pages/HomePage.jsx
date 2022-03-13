@@ -1,7 +1,11 @@
 import React, { useContext } from 'react'
+import { useEffect } from 'react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { apiContext } from '../App'
+import socketIOClient, { io } from "socket.io-client";
+import ProfileLink from '../components/ProfileLink'
+import Likedbutton from '../components/Likedbutton'
 const reactStringReplace = require('react-string-replace')
 const axios = require("axios")
 export default function HomePage() {
@@ -18,7 +22,6 @@ export default function HomePage() {
       ));
       return content
     }
-    
     const handleOnSubmit = (e) => {
         const payload = {
           contentData
@@ -38,9 +41,8 @@ export default function HomePage() {
   return (
     <div className="container">
       <div className="row ">
-        <div className="col-2">
-        <Link to="/login">Logga in</Link><br/>
-        <Link to="/signup">Create Account</Link>
+      <div className="col-2">
+      <ProfileLink />
         </div>
         <div className="col-10">
           {
@@ -62,6 +64,7 @@ export default function HomePage() {
                 
                 <Link to={`/profile/${item.userId._id}`}>{item.userId.username}</Link> <br/>
                 <p>{item.date}</p> </div>
+                <Likedbutton />
               
             </div>  
         })}
