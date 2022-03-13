@@ -1,7 +1,11 @@
 import React, { useContext } from 'react'
+import { useEffect } from 'react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { apiContext } from '../App'
+import socketIOClient, { io } from "socket.io-client";
+import ProfileLink from '../components/ProfileLink'
+import Likedbutton from '../components/Likedbutton'
 const reactStringReplace = require('react-string-replace')
 const axios = require("axios")
 export default function HomePage() {
@@ -18,82 +22,6 @@ export default function HomePage() {
       ));
       return content
     }
-    /* const renderLink = (content) => {
-      let array = []
-      content = content.replace(/(^|\s)(#[a-z\d-]+)/ig, function(match) {
-        array.push(match)
-                      if(letter[0] == "#"){
-                        const hashtagLink = `<a href=hashtag/${letter.substring(1)}>${letter}</a>`
-                        const yo = <Link to={`/hashtag/${letter.substring(2)}`}>{letter}</Link>
-                        console.log(yo)
-                        return yo
-                      }else {
-                        const hashtagLink = `<a href=hashtag/${letter.substring(2)}>${letter}</a>`
-                        const linkf = <Link to={`/hashtag/${letter.substring(2)}`}>{letter}</Link>
-                        console.log(linkf)
-                        return linkf
-                      }
-      })
-      array.forEach(item => {
-        if(item[0] == "#"){
-          return <div>{content}
-            <Link to={`/hashtag/${item.substring(1)}`}>{item}</Link>
-          </div>
-        }else {
-          return <div>{content}
-            <Link to={`/hashtag/${item.substring(2)}`}>{item}</Link>
-          </div>
-        }
-      })
-      return <Link to={`/hashtag/${array}`}>{array}</Link>
-    } */
-    /* const handleHashtag = (content) => {
-      content = content.replace(/(^|\s)(#[a-z\d-]+)/ig, function(match) {
-      let letter = match
-      if(letter[0] == "#"){
-        const hashtagLink = `<a href=hashtag/${letter.substring(1)}>${letter}</a>`
-        return hashtagLink
-      }else {
-        const hashtagLink = `<a href=hashtag/${letter.substring(2)}>${letter}</a>`
-        return hashtagLink
-      }
-    })
-      return content
-    }
-    const rightWay = (content) => {
-      const hashTag = content.match(/(^|\s)(#[a-z\d-]+)/ig)
-      let hashtagname = ""
-      if(hashTag === null){
-        return null
-      }else {
-        hashTag.forEach(item => {
-              if(item[0] == "#"){
-                hashtagname = item.substring(1)
-              }else {
-                hashtagname = item.substring(2)
-              }
-          })
-          
-      }
-      return hashtagname
-      
-    }
-    const handleHashTagName = (content) => {
-      const hashTag = content.match(/(^|\s)(#[a-z\d-]+)/ig)
-      if(hashTag === null){
-        return null
-      }else {
-        hashTag.forEach(item => {
-                return item
-            })
-          return hashTag
-      }
-      
-    }
-    const handlehashTagContent = (content) => {
-      content = content.replace(/(^|\s)(#[a-z\d-]+)/ig, "")
-      return content
-    } */
     const handleOnSubmit = (e) => {
         const payload = {
           contentData
@@ -113,9 +41,8 @@ export default function HomePage() {
   return (
     <div className="container">
       <div className="row ">
-        <div className="col-2">
-        <Link to="/login">Logga in</Link><br/>
-        <Link to="/signup">Create Account</Link>
+      <div className="col-2">
+      <ProfileLink />
         </div>
         <div className="col-10">
           {
@@ -137,6 +64,7 @@ export default function HomePage() {
                 
                 <Link to={`/profile/${item.userId._id}`}>{item.userId.username}</Link> <br/>
                 <p>{item.date}</p> </div>
+                <Likedbutton />
               
             </div>  
         })}

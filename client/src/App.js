@@ -7,6 +7,8 @@ import SignUpPage from "./pages/SignUpPage";
 import Uploadfile from "./pages/Uploadfile";
 import ProfilePageBug from "./pages/ProfilePageBug";
 import HashtagPage from "./pages/HashtagPage";
+import { Link } from "react-router-dom";
+import ProfileLink from "./components/ProfileLink";
 const axios = require("axios")
 const apiContext = createContext("")
 function App() {
@@ -18,8 +20,18 @@ function App() {
     useEffect(( ) => {
       getApi()
     }, [])
+    // bilder uppdateras ej automatiskt
+    // profile uppdateras ej när jag lägger in en bild. eprevent????
   return (
     <div className="App">
+      <div className="container">
+        <div className="row">
+          <div className="col-2">
+          <Link to="/login">Logga in</Link><br/>
+          <Link to="/signup">Create Account</Link><br/>
+          </div>
+        </div>
+      </div>
       <apiContext.Provider value={{getData, getApi}}>
         <Routes>
         <Route path="/" element={<HomePage/>} />

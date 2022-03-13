@@ -4,7 +4,17 @@ const {User, Post} = require("./models/user")
 const JWT = require("jsonwebtoken")
 const path = require("path")
 const multer = require("multer")
+const http = require("http")
+const { Server } = require("socket.io")
 
+const app = express();
+const server = http.createServer(app)
+
+const io = new Server((server), {
+    cors: {
+        origin: "http://localhost:3000"
+    }
+})
 const connect = () => {
     mongoose.connect("mongodb://localhost:27017/backend1")
 }
@@ -12,7 +22,8 @@ connect()
 
 const JWT_SECRET = "osdmfhomhdfomsdfom3209325masdo"
 const PORT = process.env.PORT || 3001;
-const app = express();
+
+
 
 let storage = multer.diskStorage({
     destination: "public",
@@ -30,7 +41,6 @@ app.use( async (req, res, next) => {
     req.post = await Post.find()
     // error när någon har en expired token lös skiten
     const authHeader = req.header("Authorization")
-    console.log(authHeader)
         if(authHeader){ 
         const token  = authHeader.split(" ")[1]
         JWT.verify(token, JWT_SECRET, function(err) {
@@ -41,18 +51,15 @@ app.use( async (req, res, next) => {
                 }
                 res.status(401).json(err)
             }else {
-                console.log("hello")
                 req.user = JWT.verify(token, JWT_SECRET)
             }
         })
     }
     next()
     
-}) 
-
+})
 const requireLogin = (req, res, next) => {
     try{
-        console.log(req.user)
       if(req.user) {
         next() 
     } else {
@@ -64,7 +71,10 @@ const requireLogin = (req, res, next) => {
     }
     
 }
-
+// få in req, res, next till ios. 
+const requirelol = (req, res, next) => {
+    console.log(req.user)
+}
 app.post("/user", async (req ,res ) => {
     const {username, password} = req.body
     const user = new User({username, password});
@@ -75,14 +85,18 @@ app.post("/user", async (req ,res ) => {
 app.patch("/user", requireLogin, async (req,res) => { 
     const { email, name, username } = req.body 
     const userId = mongoose.Types.ObjectId(req.user.userId)
+    const updateProfile = {
+        email, name, username
+    }
     if(req.file){
         const imageURL = "http://localhost:3001/" + req.file.filename
-        const result = await User.findOneAndUpdate({_id: userId}, {"name": name, "email": email, "imageURL": imageURL, "username": username})
-        res.send("Sucess")
-    }else {
-        const result = await User.findOneAndUpdate({_id: userId}, {"name": name, "email": email, "username": username})
-        res.send("Sucess")   
+        updateProfile.imageURL = imageURL
+        /* const result = await User.findOneAndUpdate({_id: userId}, {"name": name, "email": email, "imageURL": imageURL, "username": username})
+        res.send("Sucess") */
     }
+    const result = await User.findOneAndUpdate({_id: userId}, updateProfile)
+    res.send("Sucess")   
+    
     
 }) 
  
@@ -163,6 +177,6 @@ app.get("/me", (req, res) => {
     const userId = req.user.userId
 })
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });

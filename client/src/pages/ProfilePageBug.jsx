@@ -62,7 +62,10 @@ export default function ProfilePageBug() {
           headers: {'Authorization': `Bearer ` + token },
           body: formData
         })
-        fetchData()
+        .then(res => {
+          fetchData()
+          setImage("")
+        })
       }
       const handleFileUpload = (e) => {
         e.preventDefault()
@@ -136,7 +139,7 @@ export default function ProfilePageBug() {
         return content
       }
   return (
-        <div>ProfilePageBug
+        <div>
         <div className='container'>
           <div className="row">
             <div className='col-3'>
@@ -149,19 +152,20 @@ export default function ProfilePageBug() {
         }
             </div>
             <div className='col-9'>
-              {
-          postData.map((item, index) => {
-            return <div key={index} >
-              <div>{renderLink(item.content)}</div>
-              <p>{item.date}</p>
-              <img className='img-fluid img-thumbnail' style={{width: "10%"}} src={item.userId.imageURL} alt="profile" /> <br/>
-              {
-                renderDeleteButton(item)
-              }
-            </div>
-            
-          }) 
-        }
+            {postData.map((item, index) => {
+            return <div key={index}>
+              <div className="card" style={{width: "18rem;"}}>
+                <Link to={`/profile/${item.userId._id}`}><img className='img-fluid img-thumbnail' style={{width: "10%"}} src={item.userId.imageURL} alt="Jävlar" /></Link>
+                {/* <div>{handlehashTagContent(item.content)}<Link to={`/hashtag/${rightWay(item.content)}`}>{handleHashTagName(item.content)}</Link></div> */}
+                <div>{renderLink(item.content)}</div>
+                {/* <div dangerouslySetInnerHTML={{ __html: handleHashtag(item.content)}}></div> */}
+                
+                <Link to={`/profile/${item.userId._id}`}>{item.userId.username}</Link> <br/>
+                <p>{item.date}</p> </div>
+                {renderDeleteButton(item)}
+              
+            </div>  
+        })}
             </div>
         <br/>
         

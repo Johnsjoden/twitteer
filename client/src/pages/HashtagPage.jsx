@@ -2,6 +2,7 @@ import React, {useState} from 'react'
 import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
+import ProfileLink from '../components/ProfileLink'
 import reactStringReplace from 'react-string-replace'
 export default function HashtagPage() {
     const params = useParams()
@@ -15,6 +16,7 @@ export default function HashtagPage() {
     .then(res => res.json())
     .then(data => setData(data))
     }
+    // fetcha när det händer.
     useEffect(() => {
         fetchData()
     }, [])
@@ -25,11 +27,13 @@ export default function HashtagPage() {
         return content
       }
   return (
-    <div>HashtagPage
-        <div>
-
-        </div>
-                {data.map((item, index) => {
+    <div className='container'>
+        <div className='row'>
+          <div className='col-2'>
+            <ProfileLink />
+          </div>
+          <div className='col-10'>
+                 {data.map((item, index) => {
                     return <div key={index}>
               <div className="card" style={{width: "18rem;"}}>
                 <Link to={`/profile/${item.userId._id}`}><img className='img-fluid img-thumbnail' style={{width: "10%"}} src={item.userId.imageURL} alt="Jävlar" /></Link>
@@ -40,8 +44,10 @@ export default function HashtagPage() {
                 <Link to={`/profile/${item.userId._id}`}>{item.userId.username}</Link> <br/>
                 <p>{item.date}</p> </div>
               
-            </div>  
+            </div>
         })}
+        </div>
+        </div>
     </div>
   )
 }
