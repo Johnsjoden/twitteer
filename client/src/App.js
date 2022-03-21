@@ -8,17 +8,21 @@ import Uploadfile from "./pages/Uploadfile";
 import ProfilePageBug from "./pages/ProfilePageBug";
 import HashtagPage from "./pages/HashtagPage";
 import { Link } from "react-router-dom";
-import ProfileLink from "./components/ProfileLink";
+import { io } from 'socket.io-client'
+import { useRef } from "react";
 const axios = require("axios")
 const apiContext = createContext("")
 function App() {
   const [getData, setData] = useState([])
+  const client = useRef()
   const getApi = async () => {
     let response = await axios.get("/post").then(res => res.data)
     setData(response)
   }
     useEffect(( ) => {
       getApi()
+      const socket = io("http://localhost:3001")
+      client.current = socket;
     }, [])
     // bilder uppdateras ej automatiskt
     // profile uppdateras ej när jag lägger in en bild. eprevent????
@@ -32,7 +36,7 @@ function App() {
           </div>
         </div>
       </div>
-      <apiContext.Provider value={{getData, getApi}}>
+      <apiContext.Provider value={{getData, getApi, client}}>
         <Routes>
         <Route path="/" element={<HomePage/>} />
         <Route path="/login" element={<LoginPage />} />

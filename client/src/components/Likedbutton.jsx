@@ -1,23 +1,48 @@
+import jwtDecode from 'jwt-decode'
 import React from 'react'
-import { useRef } from 'react'
+import { useContext } from 'react'
 import { useState, useEffect } from 'react'
-import { io } from 'socket.io-client'
-export default function Likedbutton() {
+import { apiContext } from '../App'
+export default function Likedbutton(props) {
     const [hasLiked, setHasLiked] = useState(false)
-    const client = useRef()
+    const {
+      client,
+      getApi
+    } = useContext(apiContext)
+    console.log(props.userLikeData)
+    const userLikeData = props.userLikeData
+    const token = localStorage.getItem("key")
+      console.log(props.postId)
+      const user = jwtDecode(token)
+      const userId = user.userId
     const handleOnClick = (e) => {
         if(hasLiked){
             setHasLiked(false)
-            client.current.emit("message", "true")
+            const like = {
+              like: false,
+              userId,
+              postId: props.postId
+            }
+            client.current.emit("like", like)
+            getApi()
         }
         else {
             setHasLiked(true)
-            client.current.emit("message", "false")
+            const like = {
+              like: true,
+              userId,
+              postId: props.postId
+            }
+            client.current.emit("like", like)
+            getApi()
         }
       }
       useEffect(() => {
-        const socket = io("http://localhost:3001")
-        client.current = socket;
+        userLikeData.forEach(user => {
+          if(user === userId){ 
+            setHasLiked(true)
+          }
+        })
       }, [])
   return (
     <button onClick={handleOnClick}>{hasLiked ? "unlike" : "Like"}</button>

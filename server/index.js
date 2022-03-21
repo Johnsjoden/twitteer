@@ -23,7 +23,17 @@ connect()
 const JWT_SECRET = "osdmfhomhdfomsdfom3209325masdo"
 const PORT = process.env.PORT || 3001;
 
-
+io.on("connection", (socket) => {
+    console.log("user connected")
+    socket.on("like", async (value ) => {
+        if(value.like === true){
+            const result = await Post.findByIdAndUpdate({_id: value.postId}, {$addToSet: {like: value.userId}})
+               
+        }else {
+            const result = await Post.findByIdAndUpdate({_id: value.postId}, {$pull: {like: value.userId}})
+        }
+    })
+})
 
 let storage = multer.diskStorage({
     destination: "public",
@@ -70,9 +80,9 @@ const requireLogin = (req, res, next) => {
     
 }
 // få in req, res, next till ios. 
-const requirelol = (req, res, next) => {
+/* const requirelol = (req, res, next) => {
     console.log(req.user)
-}
+} */
 app.post("/user", async (req ,res ) => {
     const {username, password} = req.body
     const user = new User({username, password});
@@ -148,7 +158,7 @@ app.get("/profile/:id", async (req, res ) => {
 app.get("/hashtag/:id", async (req, res) => {
     const hashtag = req.params.id 
     const result = await Post.find({'content': {'$regex': new RegExp(`#\\b${hashtag}\\b`, "gi")}}).populate("userId", "imageURL username name").sort({date: -1})
-    res.json(result) 
+    res.json(result)
 }) 
 
 app.post("/posts", requireLogin ,async (req, res ) => {

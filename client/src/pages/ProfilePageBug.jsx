@@ -7,6 +7,7 @@ import { useEffect } from 'react'
 import axios from 'axios'
 import jwt_decode from "jwt-decode";
 import { apiContext } from '../App'
+import Message from "../components/Message"
 
 export default function ProfilePageBug() {
     const {
@@ -152,8 +153,10 @@ export default function ProfilePageBug() {
             <div className='col-3'>
               <img className='img-thumbnail' src={profileData.imageURL} />
               <p>Username: {profileData.username}</p>
-              <p>Name: {profileData.name}</p>
+              <p>Name: {profileData.name}</p> 
               <p>Email: {profileData.email}</p>
+              < Message userId={id} />
+              
         {
           renderForm(token)
         }

@@ -61,10 +61,14 @@ export default function HomePage() {
                 <div>{renderLink(item.content)}</div>
                 <Link to={`/profile/${item.userId._id}`}>{item.userId.username}</Link> <br/>
                 <p>{item.date}</p> </div>
-                <Likedbutton />
-              
+                {console.log(item._id)}
+                <Likedbutton postId={item._id} userLikeData={item.like} /> <span>{item.like.length}</span>
             </div>  
         })}
+        {getData.map((item, index) => {
+          console.log(item.like)
+        })
+        }
         </div>
       </div>
     </div>
